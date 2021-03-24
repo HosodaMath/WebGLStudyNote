@@ -34,7 +34,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   /// ボックスジオメトリの作成
   const BOX_GEOMETRY = new THREE.BoxBufferGeometry(10.0, 10.0, 10.0);
-  /// ボックスマテリアルの作成 BasicMaterialを使用
+  /// ボックスマテリアルの作成 LambertMaterialを使用
   const BOX_MATERIAL = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
   /// ボックスメッシュの作成
   [...Array(300).keys()].forEach((_count) => {
