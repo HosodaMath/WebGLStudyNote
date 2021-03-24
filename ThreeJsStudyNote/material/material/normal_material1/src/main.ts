@@ -33,7 +33,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // ジオメトリの作成
   /// ボックスジオメトリの作成
   const BOX_GEOMETRY = new THREE.BoxBufferGeometry(50.0, 50.0, 50.0);
-  /// ボックスマテリアルの作成 BasicMaterialを使用
+  /// ボックスマテリアルの作成 NormalMaterialを使用
   const BOX_MATERIAL = new THREE.MeshNormalMaterial();
   /// ボックスメッシュの作成
   const BOX_MESH = new THREE.Mesh(BOX_GEOMETRY, BOX_MATERIAL);
