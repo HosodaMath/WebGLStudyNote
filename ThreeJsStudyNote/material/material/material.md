@@ -113,7 +113,7 @@ new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 
 ![phongMaterial2](images/mesh_phong_material2.png)
 
-
+はっきりと反射しているのが左下の方にあると思います。
 
 ### ランダムマテリアル
 
@@ -128,6 +128,6 @@ new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 
 の4種類
 
-それぞれ20個ずつランダムに配置する。
+それぞれ30個ずつランダムに配置する。
 
 ![phongMaterial3](images/mesh_phong_material3.png)
