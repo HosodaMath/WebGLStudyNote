@@ -47,6 +47,10 @@ BasicMaterialと比べるとNormalMaterialはジオメトリの形がはっき�
 Specularつまり反射を考慮しないマテリアルになる、反射しないため光沢感はないマットな質感になる。
 陰影が必要なため、光源を置く必要がる。
 
+```ts
+new THREE.MeshLambertMaterial({ color: 0x00ff00 });
+```
+
 そもそも光源が必要なため、光源を置かないとどうなるかと言うと
 
 ![lambertMaterial0](images/lambert_material0.png)
@@ -76,3 +80,54 @@ Specularつまり反射を考慮しないマテリアルになる、反射しな
 3. 複数の光源が動いていた場合どうなるか？
 
 ![lambertMaterial4](images/lambert_material4.png)
+
+## MeshPhongMaterial
+
+フォンマテリアもしくはフォンシェーディングとも言う。
+
+フォンシェーディングはランバートシェーディングとは違い反射を考慮されているマテリアルになるため光沢感のある質感になります。
+
+ランバートシェーディングと同じで光源が必要になります。
+
+```ts
+new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+```
+
+### 点光源を周回させる。
+
+このときの条件は以下です。
+1. 平行光源と点光源を設置する。
+2. 点光源は周回させる。
+
+![phongMaterial1](images/mesh_phong_material1.png)
+
+ジオメトリが反射しているのがわかるかと思います。
+ただこれだけだでは正直わかりにくいと思います。
+
+### 複数のジオメトリを配置しつつ複数の点光源を周回させる。
+
+このときの条件は以下です
+1. このとき平行光源の設置は行わない。
+2. 点光源は3つまで配置。
+3. 点光源は別々の方向に周回させる。
+
+![phongMaterial2](images/mesh_phong_material2.png)
+
+
+
+### ランダムマテリアル
+
+複数のマテリアルをかけたジオメトリをランダムに配置する。
+
+使うマテリアルの種類
+
+1. Basic Material
+2. Normal Material
+3. Lambert Material
+4. Phong Material
+
+の4種類
+
+それぞれ20個ずつランダムに配置する。
+
+![phongMaterial3](images/mesh_phong_material3.png)
