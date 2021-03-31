@@ -93,7 +93,7 @@ new THREE.MeshLambertMaterial({ color: 0x00ff00 });
 new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 ```
 
-### 点光源を周回させる。
+### 1. 点光源を周回させる。
 
 このときの条件は以下です。
 1. 平行光源と点光源を設置する。
@@ -104,7 +104,7 @@ new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 ジオメトリが反射しているのがわかるかと思います。
 ただこれだけだでは正直わかりにくいと思います。
 
-### 複数のジオメトリを配置しつつ複数の点光源を周回させる。
+### 2. 複数のジオメトリを配置しつつ複数の点光源を周回させる。
 
 このときの条件は以下です
 1. このとき平行光源の設置は行わない。
@@ -115,19 +115,106 @@ new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 
 はっきりと反射しているのが左下の方にあると思います。
 
-### ランダムマテリアル
+### 3. ランダムマテリアル
 
 複数のマテリアルをかけたジオメトリをランダムに配置する。
 
 使うマテリアルの種類
 
-1. Basic Material
-2. Normal Material
-3. Lambert Material
-4. Phong Material
+1. `Mesh Basic Material`
+2. `Normal Material`
+3. `Lambert Material`
+4. `Phong Material`
 
 の4種類
 
 それぞれ30個ずつランダムに配置する。
 
 ![phongMaterial3](images/mesh_phong_material3.png)
+
+## Mesh Toon Material
+
+トゥーンマテリアルはトゥーンシェーダーともいい、アニメの用な感じが出るマテリアルです。
+トゥーンマテリアルはフォンマテリアルの拡張なのでフォンマテリアル同様光源が必要になります。
+
+```ts
+new THREE.MeshToonMaterial({ color: 0x444488});
+```
+
+暗めの色だとわかりにくいかもしれません。
+
+### 1. 点光源を周回させる。
+
+このときの条件は以下です。
+1. 平行光源と点光源を設置する。
+2. 点光源は周回させる。
+3. 背景色は0xffaa00に設定。
+4. マテリアルカラーは0x444488に設定。
+
+点光源を周回させるには以下のようにすれば周期彗星のようにくるくる回せます。
+(必ず```requestAnimationFrame(draw)```を呼び出す関数の中に書いてください。)
+
+```ts
+POINT_LIGHT.position.set(
+  200 * Math.sin(Date.now() / 500),
+  200 * Math.sin(Date.now() / 1000),
+  200 * Math.cos(Date.now() / 500)
+);
+```
+
+![mesh_toon_material1](images/mesh_toon_material1.png)
+
+### 2. 複数のジオメトリを配置しつつ点光源を周回させる。
+
+このときの条件は以下です
+1. 点光源は1つまで配置。
+2. 点光源は別々の方向に周回させる。
+3. 平行光源の設置。
+4. 複数の色を使う。
+
+![images/mesh_toon_material2](images/mesh_toon_material2.png)
+
+### 3. モニョモニョと動かす
+
+このときの条件は以下です
+1. 点光源は1つまで配置。
+2. 点光源は別々の方向に周回させる。
+3. 平行光源の設置。
+4. 複数の色を使う。
+5. sinとcosを使う。
+6. 画面からはみ出さない（周期彗星のような動きをする光源以外）
+
+![images/mesh_toon_material3](images/mesh_toon_material3.png)
+
+## Mesh Standard Material
+
+物理ベースレンダリングのマテリアルです。UnityやUnrealなどにも実装されています。
+3Dアプリケーション開発においては不可欠と言っても良いと思います。
+```Mesh Lambert Material```や```Mesh Phong Material```よりも光の反射や散乱などパラメーターも多く設定できるため、リアルな質感が出ると思います。
+
+### 1. どのようなパラメーターが設定できるか実際に確認してみる。
+
+```ts
+new THREE.MeshStandardMaterial({
+    color: 0x66ff99,
+    roughness: 0.5,
+    metalness: 1.0,});
+```
+
+```color```は色の設定。
+```roughness```は光沢感の設定です。設定値としては0.0から1.0の間で値が高いほど光沢感が出ます。
+```metalness```は金属感の設定です。設定値は2つしかなく0.0が非金属、1.0が金属です。
+
+### 2. Dodecahedronの増殖。
+
+1. その名の通りDodecahedronを増殖させる。
+2. 色は0x66ff99,0x6699ff,0xff9900の3色のみ。
+3. roughnessは0.5生成。
+4. metalnessは1.0を選択。
+5. 増殖数は任意。
+
+![standardMaterial2の画像](images/standardMaterial2.png)
+
+### 3. 自由だよ
+
+![standardMaterial3の画像](images/standardMaterial3.png)
