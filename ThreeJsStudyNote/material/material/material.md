@@ -201,20 +201,22 @@ new THREE.MeshStandardMaterial({
     metalness: 1.0,});
 ```
 
-```color```は色の設定。
+```color```は色の設定です。
 ```roughness```は光沢感の設定です。設定値としては0.0から1.0の間で値が高いほど光沢感が出ます。
 ```metalness```は金属感の設定です。設定値は2つしかなく0.0が非金属、1.0が金属です。
 
 ### 2. Dodecahedronの増殖。
 
+以下は条件です。
+
 1. その名の通りDodecahedronを増殖させる。
 2. 色は0x66ff99,0x6699ff,0xff9900の3色のみ。
-3. roughnessは0.5生成。
+3. roughnessはすべて0.5を設定。
 4. metalnessは1.0を選択。
 5. 増殖数は任意。
 
 ![standardMaterial2の画像](images/standardMaterial2.png)
 
-### 3. 自由だよ
+### 3. 自由だよ1
 
 ![standardMaterial3の画像](images/standardMaterial3.png)

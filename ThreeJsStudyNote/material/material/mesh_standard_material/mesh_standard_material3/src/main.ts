@@ -87,6 +87,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // 球体と点光源を作成
   /// 光源のもととなる球体の作成
+  /*
   const SPHERE_GEOMETRY_LIGHT = new THREE.SphereBufferGeometry(1.5, 20, 10);
   const SPHERE_MATERIAL_LIGHT = new THREE.MeshBasicMaterial({
     color: 0xffffff,
@@ -94,13 +95,13 @@ window.addEventListener("DOMContentLoaded", () => {
   const SPHERE_MESH_LIGHT = new THREE.Mesh(
     SPHERE_GEOMETRY_LIGHT,
     SPHERE_MATERIAL_LIGHT
-  );
+  );*/
 
   /// 点光源の作成
   const POINT_LIGHT1 = new THREE.PointLight(0xffffff, 2, 1000);
 
   /// 球体の点光源を作成(球体と点光源を組み合わせる)
-  POINT_LIGHT1.add(SPHERE_MESH_LIGHT);
+  //POINT_LIGHT1.add(SPHERE_MESH_LIGHT);
 
   /// 球体点光源の座標(0, 0, 1000)に配置
   POINT_LIGHT1.position.set(0, 0, 1000);
