@@ -1,0 +1,21 @@
+@charset "UTF-8";
+
+canvas {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: -1;
+}
+
+h1, h2, h3, p {
+  color: #f0f8ff;
+}
+
+button {
+  margin: 10px;
+  padding: 10px 50px;
+  border-radius: 5px;
+  background-color: #ffe4c4;
+  color: #555555;
+  font-weight: bold;
+}
