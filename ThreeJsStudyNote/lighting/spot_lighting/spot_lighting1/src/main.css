@@ -1,0 +1,11 @@
+@charset "UTF-8";
+
+
+canvas {
+  width: 256px;
+  height: 256px;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: -1;
+}
