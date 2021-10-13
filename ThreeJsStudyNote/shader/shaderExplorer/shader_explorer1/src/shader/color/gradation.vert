@@ -1,0 +1,10 @@
+precision highp float;
+varying vec2 vTexCoord;
+
+void main(){
+  vTexCoord = uv;
+
+  vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+
+  gl_Position = projectionMatrix * modelViewPosition;
+}
