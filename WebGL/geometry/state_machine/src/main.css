@@ -1,0 +1,21 @@
+@charset "UTF-8";
+body {
+  background-color: #ffffff;
+  color: #f0f8ff;
+}
+
+.renderingMode {
+  display: flex;
+  flex-direction: column;
+  width: 256px;
+}
+
+canvas {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: -1;
+  /*
+  width: 100vw;
+  height: 100vh;*/
+}
