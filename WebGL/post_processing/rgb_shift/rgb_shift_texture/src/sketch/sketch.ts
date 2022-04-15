@@ -2,96 +2,28 @@ import {
   createVAO,
   createProgram,
   createShader,
-  createFrameBuffer,
   updateClearColor,
 } from "../webgl/webgl";
-import {
-  Matrix4,
-  Vector4,
-  Vector3,
-  Vector2,
-  Calculator,
-} from "../math/mathematics";
-import { createSphereVao } from "./sphereVao";
+import { Vector2, Calculator } from "../math/mathematics";
 import { createPlaneVao } from "./planeVao";
-import ColorPaletteMaterialVertexShader from "../shader/palette/palette.vert?raw";
-import ColorPaletteMaterialFragmentShader from "../shader/palette/palette.frag?raw";
 import CommonVertexShader from "../shader/texture/postProcessing/common.vert?raw";
 import RGBShiftFragmentShader from "../shader/texture/postProcessing/rgb_shift.frag?raw";
-import ColorImageTexture from "../assets/texture/cloud.png";
+import PlantsImage from "../assets/texture/plants.png";
 /**
- * @description フレームバッファを適用すると見えなくなるため注意が必要なります。
+ * @@description PostProcessing
  * @param canvas
  * @param gl
- * @todo 課題としてgl_POINTSでレンダリングをすると重くなってしまうの事案が確認されたので原因を究明したいと思います。
  */
-export const sketch = async (
+export const sketch = (
   canvas: HTMLCanvasElement,
   gl: WebGL2RenderingContext
 ) => {
-  // ここからフレームバッファで使うシーンの作成
-  // ライティングシェーダーを作成
-  const lightVertexShader = createShader(
-    gl,
-    "VERTEX_SHADER",
-    ColorPaletteMaterialVertexShader
-  );
-
-  const lightFragmentShader = createShader(
-    gl,
-    "FRAGMENT_SHADER",
-    ColorPaletteMaterialFragmentShader
-  );
-
-  // ライティングプログラムの作成
-  const lightProgram = createProgram(
-    gl,
-    lightVertexShader,
-    lightFragmentShader
-  );
-
-  const lightAttributeLocationIndex = [0, 1, 2, 3];
-
-  const lightAttributeSize = [4, 3, 3, 2];
-
-  // ライティングを行うsphereを作成
-  const sphereVaoData = createSphereVao(
-    lightAttributeLocationIndex,
-    lightAttributeSize
-  );
-
-  // sphere用vaoを作成
-  const initSphereVao = createVAO(gl, sphereVaoData.vaoData);
-  const lightSphereVao = initSphereVao.vao;
-  const lightSphereIBO = initSphereVao.ibo;
-
-  // lightUniformの初期化
-  const lightUniformLocationData = {
-    uModelViewProjectionMatrix: gl.getUniformLocation(
-      lightProgram,
-      "uModelViewProjectionMatrix"
-    ),
-    uNormalInvertMatrix: gl.getUniformLocation(
-      lightProgram,
-      "uNormalInvertMatrix"
-    ),
-    uAmbientMaterial: gl.getUniformLocation(lightProgram, "uAmbientMaterial"),
-    uDirectionalLight: gl.getUniformLocation(lightProgram, "uDirectionalLight"),
-    uEyeDirection: gl.getUniformLocation(lightProgram, "uEyeDirection"),
-    uTime: gl.getUniformLocation(lightProgram, "uTime"),
-    uFrameCount: gl.getUniformLocation(lightProgram, "uFrameCount"),
-    isTexture: gl.getUniformLocation(lightProgram, "isTexture"),
-    uTexture: gl.getUniformLocation(lightProgram, "uTexture"),
-  };
-
-  // ここまでがフレームバッファ用
-
-  // ここからfilter用を作成
   const filterVertexShader = createShader(
     gl,
     "VERTEX_SHADER",
     CommonVertexShader
   );
+
   const filterFragmentShader = createShader(
     gl,
     "FRAGMENT_SHADER",
@@ -108,8 +40,6 @@ export const sketch = async (
 
   const filterAttributeSize = [4, 3, 3, 2];
 
-  // 作成したフレームバッファーを貼り付けるためのplane
-  // 必ずしもplaneを画面いっぱいに貼り付ける必要も無いですしそもそもplaneである必要もないです。
   const planeVaoData = createPlaneVao(
     filterAttributeLocationIndex,
     filterAttributeSize
@@ -119,63 +49,52 @@ export const sketch = async (
   const planeVao = initPlaneVao.vao;
   const planeIBO = initPlaneVao.ibo;
 
-  /**
-   * テクスチャ作成のための準備
-   * @todo fetchで実装したほうが良い？
-   *
-   * */
-
-  let uTexture: WebGLTexture | null = null;
-
-  const img = new Image();
-
-  img.addEventListener("load", () => {
-    const initTexture = gl.createTexture();
-
-    gl.bindTexture(gl.TEXTURE_2D, initTexture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-    gl.generateMipmap(gl.TEXTURE_2D);
-
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-
-    gl.bindTexture(gl.TEXTURE_2D, null);
-
-    //グローバルで定義するべきか？
-    uTexture = initTexture;
-  });
-
-  img.src = ColorImageTexture;
-
-  // filter用uniformの作成
+  // uniformの初期化
   const filterUniformLocationData = {
     uResolution: gl.getUniformLocation(filterProgram, "uResolution"),
     uMouse: gl.getUniformLocation(filterProgram, "uMouse"),
-    uTexture: gl.getUniformLocation(filterProgram, "uTexture"),
+    uTexture0: gl.getUniformLocation(filterProgram, "uTexture0"),
   };
 
-  // 各行列の初期化
-  const uModelMatrix = Matrix4.identity(Matrix4.init());
-  const uViewMatrix = Matrix4.identity(Matrix4.init());
-  const uProjectionMatrix = Matrix4.identity(Matrix4.init());
-  const uViewProjectionMatrix = Matrix4.identity(Matrix4.init());
-  const uModelViewProjectionMatrix = Matrix4.identity(Matrix4.init());
-  const uNormalInvertMatrix = Matrix4.identity(Matrix4.init());
+  // let startTime = Date.now();
 
-  // 視点などの調整で重要 -> いわゆるカメラ😉
-  const eye = Vector3.set(0.0, 0.0, 3.0);
-  const center = Vector3.set(0.0, 0.0, 0.0);
-  const up = Vector3.set(0.0, 1.0, 0.0);
+  let uTexture0: WebGLTexture | null = null;
 
-  // フレームバッファの作成
-  const frameBufferWidth = canvas.width;
-  const frameBufferHeight = canvas.height;
-  let frameBuffer = createFrameBuffer(gl, frameBufferWidth, frameBufferHeight);
+  /**
+   * @todo 非同期処理に変える
+   * @todo マルチテクスチャ対応 -> 完了
+   * @description テクスチャの作成
+   * @param imageURL 画像URL
+   */
+  const createTexture = (imageURL: string, textureNumber: number) => {
+    const img = new Image();
 
-  // アニメーション開始時間
-  let startTime = Date.now();
+    img.src = imageURL;
+    console.log(img.width, img.height);
+
+    const initTexture = () => {
+      const initTexture = gl.createTexture();
+
+      gl.bindTexture(gl.TEXTURE_2D, initTexture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+
+      switch (textureNumber) {
+        case 0:
+          uTexture0 = initTexture;
+          break;
+      }
+    };
+
+    img.addEventListener("load", initTexture);
+  };
+
+  createTexture(PlantsImage, 0);
 
   // 有効にしているもの
   // 必ずカリングと深度テストは有効にする
@@ -183,8 +102,8 @@ export const sketch = async (
   gl.depthFunc(gl.LEQUAL);
   gl.enable(gl.CULL_FACE);
 
-  // rgbShiftの振動数
-  let uMouse = Vector2.set(10, 10);
+
+  let uMouse = Vector2.set(0, 0);
   const uMouseData = filterUniformLocationData.uMouse;
   gl.uniform2fv(uMouseData, uMouse);
 
@@ -198,180 +117,21 @@ export const sketch = async (
   });
 
   const draw = () => {
-    // ここからフレームバッファ
-    // ここにフレームバッファのコードを作成
-    gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer.frameBuffer);
-
     updateClearColor(canvas, gl, [0.0, 0.0, 0.0]);
 
-    gl.useProgram(lightProgram);
-
-    // マテリアルの設定
-    const uAmbientMaterial = Vector4.set(0.1, 0.1, 0.1, 1.0);
-    const uAmbientMaterialData = lightUniformLocationData.uAmbientMaterial;
-    gl.uniform4fv(uAmbientMaterialData, uAmbientMaterial);
-
-    // 光源の設定
-    const uDirectionalLight = Vector3.set(-0.5, 1.0, 0.5);
-    const uDirectionalLightData = lightUniformLocationData.uDirectionalLight;
-    gl.uniform3fv(uDirectionalLightData, uDirectionalLight);
-
-    // 視点ベクトル
-    const uEyeDirection = Vector3.set(0.0, 0.0, 20.0);
-    const uEyeDirectionData = lightUniformLocationData.uEyeDirection;
-    gl.uniform3fv(uEyeDirectionData, uEyeDirection);
-
-    const uTime = (Date.now() - startTime) * 0.025;
-    const radian = Calculator.radians(uTime);
-    const axis = Vector3.set(0.0, 1.0, 1.0);
-
-    // 特定の位置を見る
-    Matrix4.lookAt(eye, center, up, uViewMatrix);
-
-    const fovy = 90.0;
-    const aspect = window.innerWidth / window.innerHeight;
-    const near = 0.1;
-    const far = 100;
-    Matrix4.perspective(fovy, aspect, near, far, uProjectionMatrix);
-
-    Matrix4.multiply(uProjectionMatrix, uViewMatrix, uViewProjectionMatrix);
-
-    // ここから大きいSphere
-    Matrix4.identity(uModelMatrix);
-
-    // ここで回転させる
-    Matrix4.rotate(uModelMatrix, radian, axis, uModelMatrix);
-
-    // scale
-    const sclaeSize = Vector3.set(2.0, 2.0, 2.0);
-    Matrix4.scale(uModelMatrix, sclaeSize, uModelMatrix);
-
-    // モデルビュー射影変換行列を求める
-    Matrix4.multiply(
-      uViewProjectionMatrix,
-      uModelMatrix,
-      uModelViewProjectionMatrix
-    );
-
-    // 逆行列を求める
-    Matrix4.invert(uModelMatrix, uNormalInvertMatrix);
-
-    const uNormalInvertMatrixData =
-      lightUniformLocationData.uNormalInvertMatrix;
-
-    // ライティングに必要な行列
-    gl.uniformMatrix4fv(uNormalInvertMatrixData, false, uNormalInvertMatrix);
-
-    const uModelViewProjectionMatrixData =
-      lightUniformLocationData.uModelViewProjectionMatrix;
-
-    // ジオメトリの位置や大きさ更にそれを見る視点やカメラなどに必要な行列
-    gl.uniformMatrix4fv(
-      uModelViewProjectionMatrixData,
-      false,
-      uModelViewProjectionMatrix
-    );
-
-    // 時間変化を加える
-    const uTimeData = lightUniformLocationData.uTime;
-    gl.uniform1f(uTimeData, uTime);
-
-    // フレームのカウント数による変化 -> 今回は時間変化とイコール
-    const uFrameCountData = lightUniformLocationData.uFrameCount;
-    gl.uniform1f(uFrameCountData, uTime);
-
-    // テクスチャ
-    // テクスチャを適用しない場合はColorPalette関数を用いる
-    const isTextureData = lightUniformLocationData.isTexture;
-    gl.uniform1i(isTextureData, Number(true));
-
-    // Texture1を適用する
-    const uTextureData = lightUniformLocationData.uTexture;
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, uTexture);
-    gl.uniform1i(uTextureData, 1);
-
-    // 親sphereを描画
-    gl.bindVertexArray(lightSphereVao);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lightSphereIBO);
-    const sphereMode1 = gl.POINTS;
-    const sphereCount1 = sphereVaoData.indices.length;
-    const sphereType1 = gl.UNSIGNED_SHORT;
-    const sphereOffset1 = 0;
-    gl.drawElements(sphereMode1, sphereCount1, sphereType1, sphereOffset1);
-
-    // bindの解除
-    gl.bindVertexArray(null);
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-    // テクスチャは背景でしか使わないので解除しています。
-    gl.bindTexture(gl.TEXTURE_2D, null);
-
-    // ここからMainのSphere
-    Matrix4.identity(uModelMatrix);
-
-    // ここで回転させる
-    Matrix4.rotate(uModelMatrix, radian, axis, uModelMatrix);
-
-    // モデルビュー射影変換行列を求める
-    Matrix4.multiply(
-      uViewProjectionMatrix,
-      uModelMatrix,
-      uModelViewProjectionMatrix
-    );
-
-    // 逆行列を求める
-    Matrix4.invert(uModelMatrix, uNormalInvertMatrix);
-
-    // ライティングに必要な行列
-    gl.uniformMatrix4fv(uNormalInvertMatrixData, false, uNormalInvertMatrix);
-
-    // ジオメトリの位置や大きさ更にそれを見る視点やカメラなどに必要な行列
-    gl.uniformMatrix4fv(
-      uModelViewProjectionMatrixData,
-      false,
-      uModelViewProjectionMatrix
-    );
-
-    // 時間変化を加える
-    gl.uniform1f(uTimeData, uTime);
-
-    // フレームのカウント数による変化 -> 今回は時間変化とイコール
-    gl.uniform1f(uFrameCountData, uTime);
-
-    // テクスチャを使わないのでColorPalette関数を用いる
-    gl.uniform1i(isTextureData, Number(false));
-
-    // Mainのsphere
-    gl.bindVertexArray(lightSphereVao);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lightSphereIBO);
-    const sphereMode2 = gl.TRIANGLES;
-    const sphereCount2 = sphereVaoData.indices.length;
-    const sphereType2 = gl.UNSIGNED_SHORT;
-    const sphereOffset2 = 0;
-    gl.drawElements(sphereMode2, sphereCount2, sphereType2, sphereOffset2);
-
-    // bindの解除
-    gl.bindVertexArray(null);
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    // ここまでがフレームバッファ
-    // ここまで実行すると今まで見えていたsphereのライティングがバックグラウンドで動いているため見えなくなる
-
-    // ここからfilter用のplaneを作成
-    updateClearColor(canvas, gl, [0.0, 0.0, 0.0]);
-
-    gl.useProgram(filterProgram);
-
+    // ここからuniformの設定
     // 画面サイズ
     const uResolution = Vector2.set(canvas.width, canvas.height);
-
     const uResolutionData = filterUniformLocationData.uResolution;
     gl.uniform2fv(uResolutionData, uResolution);
 
+    // const uTime = (Date.now() - startTime) * 0.025;
+
+    // ここからテクスチャ
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, frameBuffer.frameBufferTexture);
+    gl.bindTexture(gl.TEXTURE_2D, uTexture0);
+    const uTextureData0 = filterUniformLocationData.uTexture0;
+    gl.uniform1i(uTextureData0, 0);
 
     // plane
     gl.bindVertexArray(planeVao);
@@ -395,8 +155,6 @@ export const sketch = async (
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     gl.viewport(0, 0, canvas.width, canvas.height);
-
-    frameBuffer = createFrameBuffer(gl, canvas.width, canvas.height);
   };
 
   window.addEventListener("resize", windowResize);

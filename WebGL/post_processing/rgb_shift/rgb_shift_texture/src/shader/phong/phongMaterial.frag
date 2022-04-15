@@ -6,23 +6,16 @@ uniform mat4 uNormalInvertMatrix;
 uniform vec4 uAmbientMaterial;
 uniform vec3 uDirectionalLight;
 uniform vec3 uEyeDirection;
-uniform float uTime;
-uniform bool isTexture;
-uniform sampler2D uTexture;
-const float PI2 = 6.28318530718;
-const float TAU = PI2;
 
 // varying
 in vec4 vColor;
 in vec3 vNormal;
 in vec2 vTexCoord;
 
-// 最終的に出力される色
+// result
 out vec4 fragColor;
 
 void main(void){
-
-  vec2 uv = vTexCoord;
 
   vec3 invertLightVec = normalize(uNormalInvertMatrix * vec4(uDirectionalLight, 0.0)).xyz;
   
@@ -37,16 +30,10 @@ void main(void){
   vec4 diffuseVec = vec4(vec3(diffuse), 1.0);
 
   vec4 specularVec = vec4(vec3(specular), 1.0);
+    
+  vec4 light = vec4(vNormal, 1.0) * diffuseVec + specularVec;
 
-  vec4 color = vec4(vec3(0.0), 1.0);
-  
-  if(isTexture == false){
-    vec4 light = vec4(vNormal, 1.0) * diffuseVec + specularVec;
-    color = light + uAmbientMaterial;
-  } else {
-    // ライティングはなし
-    color = texture(uTexture, vTexCoord);
-  }
+  vec4 color = light + uAmbientMaterial;
 
   fragColor = color;
 }
