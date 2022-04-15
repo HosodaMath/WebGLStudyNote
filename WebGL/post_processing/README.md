@@ -1,6 +1,6 @@
-# 〇〇〇_textureと〇〇〇_framebufferの違いについて
+# filtername_textureとfiltername_framebufferの違いについて
 
-〇〇〇_textureは画像に対してPostProcessingがかかっています。
+filtername_textureは画像に対してPostProcessingがかかっています。
 
-〇〇〇_framebufferはリアルタイムに変化している3Dオブジェクトに対してPostProcessingがかかっています。
+filtername_framebufferはリアルタイムに変化している3Dオブジェクトに対してPostProcessingがかかっています。
 
