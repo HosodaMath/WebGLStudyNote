@@ -14,14 +14,16 @@ import {
 } from "../math/mathematics";
 import { createSphereVao } from "./sphereVao";
 import { createPlaneVao } from "./planeVao";
-import PhongMaterialVertexShader from "../shader/phong/phongMaterial.vert?raw";
-import PhongMaterialFragmentShader from "../shader/phong/phongMaterial.frag?raw";
-import CommonVertexShader from "../shader/texture/filter/common.vert?raw";
-import RGBShiftFragmentShader from "../shader/texture/filter/rgb_shift.frag?raw";
+import ColorPaletteMaterialVertexShader from "../shader/palette/palette.vert?raw";
+import ColorPaletteMaterialFragmentShader from "../shader/palette/palette.frag?raw";
+import CommonVertexShader from "../shader/texture/postProcessing/common.vert?raw";
+import RGBShiftFragmentShader from "../shader/texture/postProcessing/rgb_shift.frag?raw";
+import ColorImageTexture from "../assets/texture/cloud.png";
 /**
  * @description フレームバッファを適用すると見えなくなるため注意が必要なります。
  * @param canvas
  * @param gl
+ * @todo 課題としてgl_POINTSでレンダリングをすると重くなってしまうの事案が確認されたので原因を究明したいと思います。
  */
 export const sketch = async (
   canvas: HTMLCanvasElement,
@@ -32,13 +34,13 @@ export const sketch = async (
   const lightVertexShader = createShader(
     gl,
     "VERTEX_SHADER",
-    PhongMaterialVertexShader
+    ColorPaletteMaterialVertexShader
   );
 
   const lightFragmentShader = createShader(
     gl,
     "FRAGMENT_SHADER",
-    PhongMaterialFragmentShader
+    ColorPaletteMaterialFragmentShader
   );
 
   // ライティングプログラムの作成
@@ -76,6 +78,10 @@ export const sketch = async (
     uAmbientMaterial: gl.getUniformLocation(lightProgram, "uAmbientMaterial"),
     uDirectionalLight: gl.getUniformLocation(lightProgram, "uDirectionalLight"),
     uEyeDirection: gl.getUniformLocation(lightProgram, "uEyeDirection"),
+    uTime: gl.getUniformLocation(lightProgram, "uTime"),
+    uFrameCount: gl.getUniformLocation(lightProgram, "uFrameCount"),
+    isTexture: gl.getUniformLocation(lightProgram, "isTexture"),
+    uTexture: gl.getUniformLocation(lightProgram, "uTexture"),
   };
 
   // ここまでがフレームバッファ用
@@ -113,9 +119,40 @@ export const sketch = async (
   const planeVao = initPlaneVao.vao;
   const planeIBO = initPlaneVao.ibo;
 
+  /**
+   * テクスチャ作成のための準備
+   * @todo fetchで実装したほうが良い？
+   *
+   * */
+
+  let uTexture: WebGLTexture | null = null;
+
+  const img = new Image();
+
+  img.addEventListener("load", () => {
+    const initTexture = gl.createTexture();
+
+    gl.bindTexture(gl.TEXTURE_2D, initTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+    gl.generateMipmap(gl.TEXTURE_2D);
+
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+
+    //グローバルで定義するべきか？
+    uTexture = initTexture;
+  });
+
+  img.src = ColorImageTexture;
+
   // filter用uniformの作成
   const filterUniformLocationData = {
     uResolution: gl.getUniformLocation(filterProgram, "uResolution"),
+    uMouse: gl.getUniformLocation(filterProgram, "uMouse"),
     uTexture: gl.getUniformLocation(filterProgram, "uTexture"),
   };
 
@@ -127,14 +164,14 @@ export const sketch = async (
   const uModelViewProjectionMatrix = Matrix4.identity(Matrix4.init());
   const uNormalInvertMatrix = Matrix4.identity(Matrix4.init());
 
-  // 視点などの調整で重要
+  // 視点などの調整で重要 -> いわゆるカメラ😉
   const eye = Vector3.set(0.0, 0.0, 3.0);
   const center = Vector3.set(0.0, 0.0, 0.0);
   const up = Vector3.set(0.0, 1.0, 0.0);
 
   // フレームバッファの作成
-  const frameBufferWidth = window.innerWidth;
-  const frameBufferHeight = window.innerHeight;
+  const frameBufferWidth = canvas.width;
+  const frameBufferHeight = canvas.height;
   let frameBuffer = createFrameBuffer(gl, frameBufferWidth, frameBufferHeight);
 
   // アニメーション開始時間
@@ -145,6 +182,20 @@ export const sketch = async (
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LEQUAL);
   gl.enable(gl.CULL_FACE);
+
+  // rgbShiftの振動数
+  let uMouse = Vector2.set(10, 10);
+  const uMouseData = filterUniformLocationData.uMouse;
+  gl.uniform2fv(uMouseData, uMouse);
+
+  // MouseEvent
+  window.addEventListener("mousemove", (event) => {
+    const x = Calculator.map(event.clientX, 0, canvas.width, -10, 10);
+    const y = Calculator.map(event.clientY, 0, canvas.height, -10, 10);
+    uMouse = Vector2.set(x, y);
+    const uMouseData = filterUniformLocationData.uMouse;
+    gl.uniform2fv(uMouseData, uMouse);
+  });
 
   const draw = () => {
     // ここからフレームバッファ
@@ -174,50 +225,131 @@ export const sketch = async (
     const radian = Calculator.radians(uTime);
     const axis = Vector3.set(0.0, 1.0, 1.0);
 
+    // 特定の位置を見る
     Matrix4.lookAt(eye, center, up, uViewMatrix);
 
     const fovy = 90.0;
-    const aspect = canvas.width / canvas.height;
+    const aspect = window.innerWidth / window.innerHeight;
     const near = 0.1;
     const far = 100;
     Matrix4.perspective(fovy, aspect, near, far, uProjectionMatrix);
 
     Matrix4.multiply(uProjectionMatrix, uViewMatrix, uViewProjectionMatrix);
 
+    // ここから大きいSphere
     Matrix4.identity(uModelMatrix);
 
+    // ここで回転させる
     Matrix4.rotate(uModelMatrix, radian, axis, uModelMatrix);
 
+    // scale
+    const sclaeSize = Vector3.set(2.0, 2.0, 2.0);
+    Matrix4.scale(uModelMatrix, sclaeSize, uModelMatrix);
+
+    // モデルビュー射影変換行列を求める
     Matrix4.multiply(
       uViewProjectionMatrix,
       uModelMatrix,
       uModelViewProjectionMatrix
     );
 
+    // 逆行列を求める
     Matrix4.invert(uModelMatrix, uNormalInvertMatrix);
 
     const uNormalInvertMatrixData =
       lightUniformLocationData.uNormalInvertMatrix;
 
+    // ライティングに必要な行列
     gl.uniformMatrix4fv(uNormalInvertMatrixData, false, uNormalInvertMatrix);
 
     const uModelViewProjectionMatrixData =
       lightUniformLocationData.uModelViewProjectionMatrix;
 
+    // ジオメトリの位置や大きさ更にそれを見る視点やカメラなどに必要な行列
     gl.uniformMatrix4fv(
       uModelViewProjectionMatrixData,
       false,
       uModelViewProjectionMatrix
     );
 
-    // sphere
+    // 時間変化を加える
+    const uTimeData = lightUniformLocationData.uTime;
+    gl.uniform1f(uTimeData, uTime);
+
+    // フレームのカウント数による変化 -> 今回は時間変化とイコール
+    const uFrameCountData = lightUniformLocationData.uFrameCount;
+    gl.uniform1f(uFrameCountData, uTime);
+
+    // テクスチャ
+    // テクスチャを適用しない場合はColorPalette関数を用いる
+    const isTextureData = lightUniformLocationData.isTexture;
+    gl.uniform1i(isTextureData, Number(true));
+
+    // Texture1を適用する
+    const uTextureData = lightUniformLocationData.uTexture;
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, uTexture);
+    gl.uniform1i(uTextureData, 1);
+
+    // 親sphereを描画
     gl.bindVertexArray(lightSphereVao);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lightSphereIBO);
-    const sphereMode = gl.TRIANGLES;
-    const sphereCount = sphereVaoData.indices.length;
-    const sphereType = gl.UNSIGNED_SHORT;
-    const sphereOffset = 0;
-    gl.drawElements(sphereMode, sphereCount, sphereType, sphereOffset);
+    const sphereMode1 = gl.POINTS;
+    const sphereCount1 = sphereVaoData.indices.length;
+    const sphereType1 = gl.UNSIGNED_SHORT;
+    const sphereOffset1 = 0;
+    gl.drawElements(sphereMode1, sphereCount1, sphereType1, sphereOffset1);
+
+    // bindの解除
+    gl.bindVertexArray(null);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    // テクスチャは背景でしか使わないので解除しています。
+    gl.bindTexture(gl.TEXTURE_2D, null);
+
+    // ここからMainのSphere
+    Matrix4.identity(uModelMatrix);
+
+    // ここで回転させる
+    Matrix4.rotate(uModelMatrix, radian, axis, uModelMatrix);
+
+    // モデルビュー射影変換行列を求める
+    Matrix4.multiply(
+      uViewProjectionMatrix,
+      uModelMatrix,
+      uModelViewProjectionMatrix
+    );
+
+    // 逆行列を求める
+    Matrix4.invert(uModelMatrix, uNormalInvertMatrix);
+
+    // ライティングに必要な行列
+    gl.uniformMatrix4fv(uNormalInvertMatrixData, false, uNormalInvertMatrix);
+
+    // ジオメトリの位置や大きさ更にそれを見る視点やカメラなどに必要な行列
+    gl.uniformMatrix4fv(
+      uModelViewProjectionMatrixData,
+      false,
+      uModelViewProjectionMatrix
+    );
+
+    // 時間変化を加える
+    gl.uniform1f(uTimeData, uTime);
+
+    // フレームのカウント数による変化 -> 今回は時間変化とイコール
+    gl.uniform1f(uFrameCountData, uTime);
+
+    // テクスチャを使わないのでColorPalette関数を用いる
+    gl.uniform1i(isTextureData, Number(false));
+
+    // Mainのsphere
+    gl.bindVertexArray(lightSphereVao);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lightSphereIBO);
+    const sphereMode2 = gl.TRIANGLES;
+    const sphereCount2 = sphereVaoData.indices.length;
+    const sphereType2 = gl.UNSIGNED_SHORT;
+    const sphereOffset2 = 0;
+    gl.drawElements(sphereMode2, sphereCount2, sphereType2, sphereOffset2);
 
     // bindの解除
     gl.bindVertexArray(null);
@@ -226,7 +358,7 @@ export const sketch = async (
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     // ここまでがフレームバッファ
     // ここまで実行すると今まで見えていたsphereのライティングがバックグラウンドで動いているため見えなくなる
-      
+
     // ここからfilter用のplaneを作成
     updateClearColor(canvas, gl, [0.0, 0.0, 0.0]);
 
