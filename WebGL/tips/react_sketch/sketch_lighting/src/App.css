@@ -1,0 +1,60 @@
+html {
+  font-size: 100%;
+}
+
+body {
+  background-color: #333333;
+  color: #f0f8ff;
+}
+
+a {
+  text-decoration: none;
+  color: #f0f8ff;
+}
+
+canvas {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+}
+
+
+.wrapper {
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: 20px;
+}
+
+.navigationLink {
+  background-color: #5a2d03;
+  color: #faebd7;
+  font-size: 1.5rem;
+  padding: 20px;
+  max-width: 256px;
+}
+
+
+.sketch {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fullScreenButton {
+  background-color: #636363;
+  color: #f0f8ff;
+  font-size: 0.5rem;
+  border: 2px dashed #f0f8ff;
+  border-radius: 5%;
+  box-shadow: none;
+  cursor: pointer;
+  display: block;
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: 64px;
+  height: 32px;
+}
