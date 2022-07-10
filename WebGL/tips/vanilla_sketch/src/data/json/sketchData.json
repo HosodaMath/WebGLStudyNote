@@ -1,0 +1,20 @@
+[
+  {
+    "sketchID": "sketchID1",
+    "sketchTitle": "SketchTitle1",
+    "sketchSrc": "./sketch/sketch.png",
+    "sketchDescription": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Enimmolestias omnis totam. Accusantium assumenda consequuntur cumque, doloribus eos excepturi exercitationem facilis fugiat, molestias necessitatibus non praesentium quae repellendus tempora ullam!"
+  },
+  {
+    "sketchID": "sketchID2",
+    "sketchTitle": "SketchTitle2",
+    "sketchSrc": "./sketch/sketch.png",
+    "sketchDescription": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Enimmolestias omnis totam. Accusantium assumenda consequuntur cumque, doloribus eos excepturi exercitationem facilis fugiat, molestias necessitatibus non praesentium quae repellendus tempora ullam!"
+  },
+  {
+    "sketchID": "sketchID3",
+    "sketchTitle": "SketchTitle3",
+    "sketchSrc": "./sketch/sketch.png",
+    "sketchDescription": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Enimmolestias omnis totam. Accusantium assumenda consequuntur cumque, doloribus eos excepturi exercitationem facilis fugiat, molestias necessitatibus non praesentium quae repellendus tempora ullam!"
+  }
+]
