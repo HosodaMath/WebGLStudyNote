@@ -1,0 +1,27 @@
+{
+  "name": "template",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.4",
+    "vite": "^2.9.9"
+  },
+  "dependencies": {
+    "@stylelint/postcss-css-in-js": "^0.38.0",
+    "@types/node": "^18.0.3",
+    "postcss-syntax": "^0.36.2",
+    "prettier": "^2.7.1",
+    "sanitize.css": "^13.0.0",
+    "sass": "^1.53.0",
+    "stylelint-config-prettier": "^9.0.3",
+    "stylelint-config-recess-order": "^3.0.0",
+    "stylelint-config-standard": "^26.0.0",
+    "stylelint-prettier": "^2.0.0",
+    "tweakpane": "^3.1.0"
+  }
+}

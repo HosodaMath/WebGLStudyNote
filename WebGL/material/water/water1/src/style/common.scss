@@ -1,0 +1,29 @@
+html {
+  font-size: 100%;
+}
+
+body {
+  background-color: #383838;
+  font-family: "Times New Roman", Times, serif;
+  line-height: 1.7;
+  color: #f0f8ff;
+}
+
+li {
+  list-style: none;
+}
+
+a {
+  color: #443322;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+}
+
+.wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 4%;
+}
