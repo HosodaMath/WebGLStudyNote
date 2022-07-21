@@ -1,0 +1,308 @@
+html {
+  font-size: 100%;
+}
+
+body {
+  background-color: #faebd7;
+  font-family: "Times New Roman", Times, serif;
+  line-height: 1.7;
+  color: #443322;
+}
+
+li {
+  list-style: none;
+}
+
+a {
+  color: #443322;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+}
+
+.wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 4%;
+}
+
+/*
+  PageHeader
+  common
+  ---------------------------------------------
+*/
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+}
+
+.mainTitle a {
+  color: #443322;
+}
+
+.mainNavigation {
+  display: flex;
+  font-size: 1.25rem;
+  margin-top: 34px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.mainNavigation li {
+  margin-left: 36px;
+}
+
+.mainNavigation a {
+  color: #443322;
+}
+
+.navigationLink {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.navigationLink::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: #313131;
+  -webkit-transform: translate(-100%, 0);
+  transform: translate(-100%, 0);
+  transition: transform cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.4s;
+  transition: transform cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.4s, -webkit-transform cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.4s;
+  content: "";
+}
+
+.navigationLink:hover::after {
+  -webkit-transform: translate(0, 0);
+  transform: translate(0, 0);
+}
+
+/*
+  Page Title
+  About Note Code Book Sketch
+  ---------------------------------------------
+*/
+.pageTitle {
+  font-size: 4rem;
+  font-family: serif;
+  font-weight: normal;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/*
+  Home Contents
+  ---------------------------------------------
+*/
+.homeTitle {
+  font-size: 5rem;
+  font-family: serif;
+  font-weight: normal;
+  text-align: center;
+}
+
+.projectButton {
+  display: -ms-grid;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.homeMessage {
+  margin: 20px;
+  padding: 20px;
+}
+
+.homeNavigationButton {
+  background-color: #443322;
+  border-radius: 5px;
+  -webkit-box-shadow: 0 15px 10px 5px #29292900;
+  box-shadow: 0 15px 10px 5px #29292900;
+  color: #faebd7;
+  cursor: pointer;
+  font-size: 1.3rem;
+  padding: 18px 32px;
+  text-align: center;
+  -webkit-transition: -webkit-box-shadow 2s ease-out, -webkit-transform 2s ease-out;
+  transition: -webkit-box-shadow 2s ease-out, -webkit-transform 2s ease-out;
+  transition: box-shadow 2s ease-out, transform 2s ease-out;
+  transition: box-shadow 2s ease-out, transform 2s ease-out, -webkit-box-shadow 2s ease-out, -webkit-transform 2s ease-out;
+}
+
+.homeNavigationButton:hover {
+  -webkit-box-shadow: 0 15px 10px 5px #29292980;
+  box-shadow: 0 15px 10px 5px #29292980;
+  -webkit-transform: translateY(-10px);
+  transform: translateY(-10px);
+}
+
+/*
+  About Page
+---------------------------------------------
+*/
+.aboutTitle {
+  font-size: 2.5rem;
+}
+
+.aboutSectionTitle {
+  font-size: 1.8rem;
+}
+
+.aboutContents p {
+  font-size: 1.25rem;
+}
+
+.skillList li {
+  font-size: 1.25rem;
+  padding: 3px 10px;
+  margin: 5px;
+}
+
+/*
+  Common 
+  CodePage BookPage SketchPage
+  ---------------------------------------------
+*/
+.projectTitle {
+  font-size: 2.0rem;
+  text-align: center;
+}
+
+.contentsMessage {
+  border: 5px dashed black;
+  margin: 10px;
+  padding: 10px;
+}
+
+.codeContents,
+.bookContents,
+.sketchContents {
+  margin-top: 5%;
+}
+
+.codeContents p,
+.bookContents p,
+.sketchContents p {
+  font-size: 1.125rem;
+  margin: 10px 0 0;
+}
+
+.codeGrid,
+.bookGrid,
+.sketchGrid {
+  display: -ms-grid;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  margin-top: 6%;
+  margin-bottom: 50px;
+}
+
+.codeImg,
+.bookImg,
+.sketchImg {
+  -webkit-transition: -webkit-box-shadow 1s ease-in, -webkit-transform 2s ease-out;
+  transition: -webkit-box-shadow 1s ease-in, -webkit-transform 2s ease-out;
+  transition: box-shadow 1s ease-in, transform 2s ease-out;
+  transition: box-shadow 1s ease-in, transform 2s ease-out, -webkit-box-shadow 1s ease-in, -webkit-transform 2s ease-out;
+  -webkit-box-shadow: 0 15px 10px 5px #29292900;
+  box-shadow: 0 15px 10px 5px #29292900;
+}
+
+.codeImg:hover,
+.bookImg:hover,
+.sketchImg:hover {
+  -webkit-box-shadow: 0 15px 10px 5px #29292975;
+  box-shadow: 0 15px 10px 5px #29292975;
+  -webkit-transform: translate(-5px, -5px);
+  transform: translate(-5px, -5px);
+}
+
+.itemDescription {
+  font-size: 1.0rem;
+  font-weight: bold;
+}
+
+.useSkillList {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 5px;
+  font-size: 0.8rem;
+}
+
+canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+}
+
+/*
+  Footer
+  ---------------------------------------------
+*/
+footer {
+  text-align: center;
+  padding: 26px 0;
+  margin-top: 5%;
+}
+
+footer p {
+  color: #443322;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 600px) {
+  .pageTitle {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+
+  .pageHeader {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    flex-direction: column;
+    -webkit-box-align: center;
+    align-items: center;
+  }
+
+  .mainNavigation {
+    font-size: 1.0rem;
+    margin-top: 30px;
+  }
+
+  .mainNavigation li {
+    margin: 0 20px;
+  }
+
+  .homeMessage {
+    font-size: 0.8rem;
+    margin: 10px;
+  }
+
+  .contentsMessage {
+    border: 2px dashed black;
+    margin: 5px;
+    padding: 5px;
+  }
+
+  .noteContents p,
+  .sketchContents p {
+    font-size: 1.0rem;
+    margin: 0;
+  }
+
+  .itemDescription {
+    font-size: 0.5rem;
+  }
+}
+
+/*# sourceMappingURL=main.css.map */
